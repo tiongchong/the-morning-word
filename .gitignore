@@ -1,0 +1,5 @@
+
+# Build & i18n staging artifacts
+site/
+.zensical-i18n/
+.cache/

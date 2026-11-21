@@ -1,0 +1,82 @@
+
+name: Build and Deploy Morning Word
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install zensical pymarkdownlnt
+
+      - name: Lint Markdown content
+        run: pymarkdown -c .pymarkdown scan content/ README.md
+
+      - name: Build multilingual site
+        run: |
+          rm -rf site .zensical-i18n .cache .zensical_*.toml
+          python3 scripts/build_i18n.py
+          rm -f .zensical_*.toml
+
+      - name: Verify generated site
+        run: |
+          if [ ! -d site ]; then
+            echo "::error::Site directory was not generated!"
+            exit 1
+          fi
+
+          if [ ! -s site/index.html ]; then
+            echo "::error::Site entry point is missing or empty!"
+            exit 1
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,32 @@
+[project]
+site_name = "The Morning Word"
+site_url = "https://tiongchong.github.io/the-morning-word/"
+site_description = "Daily morning readings — Chinese primary text with English and Malay translations."
+docs_dir = "content"
+site_dir = "site"
+use_directory_urls = true
+
+[project.theme]
+language = "zh"
+
+[project.plugins.i18n]
+docs_structure = "folder"
+fallback_to_default = true
+reconfigure_material = true
+reconfigure_search = true
+
+[[project.plugins.i18n.languages]]
+locale = "zh"
+default = true
+name = "中文"
+build = true
+
+[[project.plugins.i18n.languages]]
+locale = "en"
+name = "English"
+build = true
+
+[[project.plugins.i18n.languages]]
+locale = "ms"
+name = "Bahasa Melayu"
+build = true
